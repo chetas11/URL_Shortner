@@ -1,0 +1,19 @@
+body {
+  background-color: #03506f;
+  font-family: "Merriweather", serif;
+  color: #373a40;
+}
+
+.container {
+  margin-top: 100px;
+  background-color: aliceblue;
+}
+
+i {
+  color: goldenrod;
+}
+
+p {
+  margin: 0%;
+  padding: 0%;
+}
