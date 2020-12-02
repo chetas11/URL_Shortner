@@ -4,11 +4,6 @@ body {
   color: #373a40;
 }
 
-.container {
-  margin-top: 100px;
-  background-color: aliceblue;
-}
-
 i {
   color: goldenrod;
 }
@@ -16,4 +11,9 @@ i {
 p {
   margin: 0%;
   padding: 0%;
+}
+
+.container {
+  margin-top: 100px;
+  background-color: aliceblue;
 }
