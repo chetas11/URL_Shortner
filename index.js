@@ -12,17 +12,6 @@ var nodemailer = require('nodemailer');
 var randomstring = require("randomstring");
 let random = "";
 
-// MongoClient.connect(url, function(err, db) {                                     
-//   if (err) throw err;
-//   var dbo = db.db("trail");
-//   var myobj = { email: "m.banuprakashmib@gmail.com" };
-//   dbo.collection("AllData").insertOne(myobj, function(err, res) {
-//     if (err) throw err;
-//     console.log("document inserted");
-//     db.close();
-//   });
-// }); 
-
 app
 .use(express.static(__dirname + '/public'))
 .use(bodyParser.urlencoded({extended: true}))
