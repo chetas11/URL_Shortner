@@ -13,7 +13,12 @@ p {
   padding: 0%;
 }
 
+a {
+  color: #373a40;
+}
+
 .container {
   margin-top: 100px;
   background-color: aliceblue;
+  padding: 40px;
 }
