@@ -15,21 +15,18 @@ const password = process.env.MAILPASSWORD;
 let random = "";
 let activationString = "";
 
+MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("newDB");
+    var query = { activationTimer: { $lt: Date.now() }, activationString: { $ne: "Activated" } };
+    dbo.collection("Userdata").deleteMany(query)
+});
+
 app
 .use(express.static(__dirname + '/public'))
 .use(bodyParser.urlencoded({extended: true}))
 .get("/", (req, res)=>{                                                     
     res.sendFile(__dirname +"/index.html")
-    MongoClient.connect(url, function(err, db) {
-    if (err) throw err;
-    var dbo = db.db("newDB");
-    var query = { activationTimer : { $lt: Date.now() }, activationString: { $ne: "Activated" } };
-    dbo.collection("Userdata").deleteMany(query, function(err, obj) {
-        if (err) throw err;
-        db.close();
-        console.log("Rows Deleted!")
-        });
-    });
 })
 .post("/home", (req, res)=>{                                                    
     MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }, function(err, db) {
