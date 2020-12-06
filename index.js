@@ -28,11 +28,11 @@ app
 .get("/", (req, res)=>{                                                     
     res.sendFile(__dirname +"/index.html")
 })
-.post("/home", (req, res)=>{                                                    
+.post("/home", (req, res)=>{  
     MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }, function(err, db) {
             if (err) throw err;
             var dbo = db.db("newDB");
-            var myquery = { email: req.body.email, password: md5(req.body.password) };
+            var myquery = { email: req.body.email, password: md5(req.body.password), activationString:"Activated" };
             dbo.collection("Userdata").find(myquery).toArray(function(err, result) {
                 if (err) throw err;
                 if(result.length === 0 ){
@@ -44,7 +44,7 @@ app
             });
     });
 })
-.post("/newuser", (req, res)=>{   
+.post("/newuser", (req, res)=>{
     activationString = randomstring.generate();                                                  
     MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }, function(err, db) {
         if (err) throw err;
@@ -97,10 +97,9 @@ app
                 if(result.length > 0){
                     dbo.collection("Userdata").updateOne(query, myquery, function(err, res) {
                         if (err) throw err;
-                        console.log("1 document updated");
                         db.close();
                     });
-                    res.sendFile(__dirname+"/public/reset.html");
+                    res.sendFile(__dirname+"/public/activated.html");
                 }else{
                     res.sendFile(__dirname+"/public/invalid.html")
                 }
@@ -115,7 +114,7 @@ app
     if (err) throw err;
     let dbo = db.db("newDB");
     let query = { email: req.body.email };
-    dbo.collection("AllData").find(query).toArray(function(err, result) {
+    dbo.collection("Userdata").find(query).toArray(function(err, result) {
         if (err) throw err;
         if(result.length === 0 ){
             res.sendFile(__dirname+"/public/Failed.html")
@@ -153,7 +152,7 @@ app
             var dbo = db.db("newDB");
             var myquery = { email: req.body.email };
             var newvalues = { $set: {tempString : random , resetPasswordExpires : Date.now() + 600000 } }; // Set the expiration time to 10 mins
-            dbo.collection("AllData").updateOne(myquery, newvalues, function(err, res) {
+            dbo.collection("Userdata").updateOne(myquery, newvalues, function(err, res) {
                 if (err) throw err;
                 db.close();
             });
@@ -164,7 +163,7 @@ app
             if (err) throw err;
             var dbo = db.db("newDB");
             var query = { tempString : req.params.token, resetPasswordExpires: { $gt: Date.now() } };
-            dbo.collection("AllData").find(query).toArray(function(err, result) {
+            dbo.collection("Userdata").find(query).toArray(function(err, result) {
                 if(result.length > 0){
                     res.sendFile(__dirname+"/public/reset.html")
                 }else{
@@ -183,14 +182,14 @@ app
             var dbo = db.db("newDB");                           // Change Password for the specified user
             var myquery = { tempString: random };
             var newvalues = { $set: {password : md5(req.body.Password) } };
-            dbo.collection("AllData").updateOne(myquery, newvalues, function(err, res) {
+            dbo.collection("Userdata").updateOne(myquery, newvalues, function(err, res) {
                 if (err) throw err;
                 MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }, function(err, db) {
                 if (err) throw err;                                    
                 var dbo = db.db("newDB");           
                 var myquery = { tempString: random };
                 var newvalues = { $set: {tempString : "" } };                           // removing the random string
-                dbo.collection("AllData").updateOne(myquery, newvalues, function(err, res) {
+                dbo.collection("Userdata").updateOne(myquery, newvalues, function(err, res) {
                     if (err) throw err;
                     db.close();
                 });
