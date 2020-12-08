@@ -18,7 +18,9 @@
     "express-session": "^1.17.1",
     "md5": "^2.3.0",
     "mongodb": "^3.6.3",
+    "mongoose": "^5.11.4",
     "nodemailer": "^6.4.16",
-    "randomstring": "^1.1.5"
+    "randomstring": "^1.1.5",
+    "shortid": "^2.2.16"
   }
 }

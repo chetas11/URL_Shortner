@@ -17,6 +17,10 @@ a {
   color: #373a40;
 }
 
+table {
+  width: 100%;
+}
+
 .container {
   margin-top: 100px;
   background-color: aliceblue;

@@ -6,10 +6,14 @@ require("dotenv").config();
 var md5 = require('md5');
 const nodemailer = require('nodemailer'); 
 let randomstring = require("randomstring");
-
-
 const url = process.env.MONGO_URL;
+const url1 = process.env.MONGO_URL1;
 const password = process.env.MAILPASSWORD;
+const ShortURL = require("./shortURL");
+const mongoose = require("mongoose");
+const shortURL = require("./shortURL");
+
+mongoose.connect(url1 || process.env.MONGODB_URI1, { useUnifiedTopology: true }, { useNewUrlParser: true })
 
 
 let random = "";
@@ -21,12 +25,32 @@ MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }
     var query = { activationTimer: { $lt: Date.now() }, activationString: { $ne: "Activated" } };
     dbo.collection("Userdata").deleteMany(query)
 });
-
+app.set('view engine', 'ejs')
 app
 .use(express.static(__dirname + '/public'))
 .use(bodyParser.urlencoded({extended: true}))
 .get("/", (req, res)=>{                                                     
     res.sendFile(__dirname +"/index.html")
+})
+.post('/shorturl', async (req, res)=>{
+    await ShortURL.create({full: req.body.url})
+    res.redirect("/home")
+})
+.get('/home', async (req, res)=>{   
+    const shortUrls = await ShortURL.find()
+    res.render('index', {shortUrls: shortUrls})  
+})
+
+.get('/AllUrls', async (req, res)=>{   
+    const ALLUrls = await ShortURL.find()
+    res.render('AllUrls', {shortUrls: ALLUrls})  
+})
+.get('/:shorturls', async (req, res)=>{   
+    const shortUrl = await shortURL.findOne({ short: req.params.shorturls})
+    if(shortUrl === null) return res.sendFile(__dirname+"/public/notFound.html")
+    shortUrl.clicks++
+    shortUrl.save()
+    res.redirect(shortUrl.full)
 })
 .post("/home", (req, res)=>{  
     MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }, function(err, db) {
@@ -37,8 +61,8 @@ app
                 if (err) throw err;
                 if(result.length === 0 ){
                     res.send("Sorry not registered")
-                }else{
-                    res.send("Logged In")
+                }else{ 
+                    res.redirect("/home")
                 }
                 db.close();
             });
@@ -105,6 +129,9 @@ app
                 }
             });
         });
+})
+.get("/Allurls", (req, res)=>{
+    res.render("AllUrls.ejs")
 })
 
 
