@@ -1,21 +1,21 @@
 const express = require("express")
 const bodyParser = require("body-parser")
-const app = express();
-const MongoClient = require('mongodb').MongoClient;
-require("dotenv").config();
-var md5 = require('md5');
+const MongoClient = require('mongodb');
 const nodemailer = require('nodemailer'); 
 let randomstring = require("randomstring");
+const ShortURL = require("./shortURL");
+const {createToken} = require("./services/authServices")
+const cookieParser = require('cookie-parser')
+const authMiddleWare = require("./services/authMiddleware")
+const mongoose = require("mongoose");
+const md5 = require('md5');
+require("dotenv").config();
+
+const app = express();
 const url = process.env.MONGO_URL;
 const url1 = process.env.MONGO_URL1;
 const password = process.env.MAILPASSWORD;
-const ShortURL = require("./shortURL");
-const mongoose = require("mongoose");
-const shortURL = require("./shortURL");
-
 mongoose.connect(url1 || process.env.MONGODB_URI1, { useUnifiedTopology: true }, { useNewUrlParser: true })
-
-
 let random = "";
 let activationString = "";
 
@@ -26,27 +26,28 @@ MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }
     dbo.collection("Userdata").deleteMany(query)
 });
 app.set('view engine', 'ejs')
+app.use(cookieParser())
 app
 .use(express.static(__dirname + '/public'))
 .use(bodyParser.urlencoded({extended: true}))
 .get("/", (req, res)=>{                                                     
     res.sendFile(__dirname +"/index.html")
 })
-.post('/shorturl', async (req, res)=>{
+.post('/shorturl',authMiddleWare,  async (req, res)=>{
     await ShortURL.create({full: req.body.url})
     res.redirect("/home")
 })
-.get('/home', async (req, res)=>{   
+.get('/home',authMiddleWare, async (req, res)=>{
     const shortUrls = await ShortURL.find()
-    res.render('index', {shortUrls: shortUrls})  
+    res.render('index', {shortUrls: shortUrls}) 
 })
 
-.get('/AllUrls', async (req, res)=>{   
+.get('/AllUrls',authMiddleWare, async (req, res)=>{   
     const ALLUrls = await ShortURL.find()
     res.render('AllUrls', {shortUrls: ALLUrls})  
 })
-.get('/:shorturls', async (req, res)=>{   
-    const shortUrl = await shortURL.findOne({ short: req.params.shorturls})
+.get('/:shorturls',authMiddleWare, async (req, res)=>{   
+    const shortUrl = await ShortURL.findOne({ short: req.params.shorturls})
     if(shortUrl === null) return res.sendFile(__dirname+"/public/notFound.html")
     shortUrl.clicks++
     shortUrl.save()
@@ -60,8 +61,14 @@ app
             dbo.collection("Userdata").find(myquery).toArray(function(err, result) {
                 if (err) throw err;
                 if(result.length === 0 ){
-                    res.send("Sorry not registered")
+                    res.sendFile(__dirname+"/public/unauthorised.html")
                 }else{ 
+                    const token =  createToken(req.body.email)
+                    res.cookie("jwt", token,{
+                        maxAge: 100000000000,
+                        httpOnly: false,
+                        secure: false
+                    });
                     res.redirect("/home")
                 }
                 db.close();
@@ -130,11 +137,6 @@ app
             });
         });
 })
-.get("/Allurls", (req, res)=>{
-    res.render("AllUrls.ejs")
-})
-
-
 .post("/reset",(req, res)=>{
     random = randomstring.generate();
     MongoClient.connect(url || process.env.MONGODB_URI, { useUnifiedTopology: true }, function(err, db) {
@@ -229,7 +231,10 @@ app
    }
    
 })
-
+.get("/user/logout", (req, res)=>{
+    res.clearCookie("jwt")                                                                
+    res.redirect("/")
+})
 
 .get("*", (req, res)=>{                                             // Default route                    
     res.sendFile(__dirname+"/public/notFound.html")

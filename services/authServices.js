@@ -1,24 +1,23 @@
-const bcrypt = require("bcrypt");
-const saltRounds = 10;
+require("dotenv").config();
 
-exports.generateHash = ((planText)=>{
-    return new Promise((resolve, reject)=>{
-        bcrypt
-            .hash(planText, saltRounds)
-            .then(function(hash){
-                resolve(hash)
-            })
-            .catch(reject)
-    })
-});
+const jwt = require("jsonwebtoken");
+const secret = process.env.Secret;
 
-exports.validateHash = ((plainText, passwordHash) =>{
-    return new Promise((resolve, reject)=>{
-        bcrypt
-            .compare(plainText, passwordHash)
-            .then(function(result){
-                resolve(result);
-            })
-            .catch(reject)
-    })
-});
+exports.createToken = (username) => {
+    return jwt.sign({
+        username
+    },
+    secret,
+    {expiresIn: "5 days"}
+    );
+}
+
+exports.validateToken = (token) => {
+    try{
+        const decoded = jwt.verify(token, secret)
+        return decoded;
+    }catch(err){
+        console.log(err);
+        return false
+    }
+}
