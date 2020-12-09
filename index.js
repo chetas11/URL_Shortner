@@ -246,5 +246,5 @@ app
     res.sendFile(__dirname+"/public/notFound.html")
 })
 
-.listen(8000 || process.env.PORT);
+.listen(process.env.PORT);
 
