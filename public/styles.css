@@ -28,6 +28,9 @@ table {
   background-color: aliceblue;
   padding: 40px;
 }
+.fa-frown {
+  color: red;
+}
 
 .container-fluid {
   background-color: aliceblue;
