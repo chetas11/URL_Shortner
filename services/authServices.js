@@ -3,16 +3,16 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const secret = process.env.Secret;
 
-exports.createToken = (username) => {
+exports.createToken = (username) => {               // function to create Jwt token  
     return jwt.sign({
         username
     },
     secret,
-    {expiresIn: "5 days"}
+    {expiresIn: "2 days"}
     );
 }
 
-exports.validateToken = (token) => {
+exports.validateToken = (token) => {                // function to verify token 
     try{
         const decoded = jwt.verify(token, secret)
         return decoded;
