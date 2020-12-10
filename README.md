@@ -27,3 +27,7 @@
 
 #### Working site deployed on heroku - https://frozen-citadel-90146.herokuapp.com/
 
+#### Screenshot - 
+
+![Screenshot](https://github.com/chetas11/URL_Shortner/blob/master/Screenshot.png)
+
